@@ -1,65 +1,49 @@
 package ru.itm.spring.boot_security.demo.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.validation.BindingResult;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import ru.itm.spring.boot_security.demo.entity.Role;
 import ru.itm.spring.boot_security.demo.entity.User;
-import ru.itm.spring.boot_security.demo.exeptions.UserErrorResponse;
-import ru.itm.spring.boot_security.demo.exeptions.UserNotCreatedException;
+import ru.itm.spring.boot_security.demo.service.RoleService;
 import ru.itm.spring.boot_security.demo.service.UserService;
 
-import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 
 
-@RestController
-@RequestMapping("/admin")
-public class AdminRestController {
-    private final UserService service;
+    @RequiredArgsConstructor
+    @RestController
+    @RequestMapping("/api")
+    public class AdminRestController {
+        private final UserService userService;
+        private final RoleService roleService;
 
-    @Autowired
-    public AdminRestController(UserService service) {
-        this.service = service;
-    }
+        @GetMapping("/users")
+        public List<User> allUsers() {
+            List<User> users = userService.findAllUsers();
+            return users;
+        }
 
-    @GetMapping("/table")
-    public List<User> findAll() {
-        return service.findAllUsers();
-    }
+        @GetMapping("/roles")
+        public List<Role> allRoles() {
+            List<Role> roles = new ArrayList<>(roleService.getAllRoles());
+            return roles;
+        }
 
-    @GetMapping("/found/{id}")
-    public User getUser(@PathVariable("id") Long id) {
-        return service.findUserById(id);
-    }
+        @PostMapping("/newUser")
+        public User addUser(@RequestBody User user) {
+            userService.saveUser(user);
+            return user;
+        }
+        @PutMapping("/edit")
+        public User updateUser(@RequestBody User user){
+            userService.updateUser(user);
+            return user;
+        }
+        @DeleteMapping("/user/{id}")
+        public void deleteUserById(@PathVariable("id") long id){
+            userService.deleteUserById(id);
+        }
 
-    @DeleteMapping("/delete/{id}")
-    public Long deleteUser(@PathVariable("id") Long id) {
-        service.deleteUserById(id);
-        return id;
-    }
 
-    @PostMapping("/new")
-    public ResponseEntity<HttpStatus> create(@RequestBody @Valid User user, BindingResult bindingResult) {
-        return service.checkErrorAddUser(user, bindingResult);
     }
-
-    @PostMapping("/saveuser")
-    public ResponseEntity<HttpStatus> update(@RequestBody @Valid User user, BindingResult bindingResult) {
-        return service.checkErrorUpdateUser(user, bindingResult);
-    }
-
-    @ExceptionHandler
-    private ResponseEntity<UserErrorResponse> handleException(UsernameNotFoundException e) {
-        UserErrorResponse userErrorResponse = new UserErrorResponse("User with this id not found!", System.currentTimeMillis());
-        return new ResponseEntity<>(userErrorResponse, HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler
-    private ResponseEntity<UserErrorResponse> handleException(UserNotCreatedException e) {
-        UserErrorResponse userErrorResponse = new UserErrorResponse(e.getMessage(), System.currentTimeMillis());
-        return new ResponseEntity<>(userErrorResponse, HttpStatus.BAD_REQUEST);
-    }
-}
