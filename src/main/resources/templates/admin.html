@@ -1,0 +1,53 @@
+<!DOCTYPE HTML>
+<html lang="ru" xmlns:th="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="UTF-8"/>
+    <title>All users</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+    <link href="https://getbootstrap.com/docs/4.0/examples/signin/signin.css" rel="stylesheet" crossorigin="anonymous"/>
+</head>
+<body>
+<h2>Admin panel</h2>
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>User name</th>
+        <th>Role</th>
+        <th>Operations</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="user : ${allUser}">
+        <td th:text="${user.id}"></td>
+        <td th:text="${user.username}"></td>
+        <td>
+        <span th:each="role : ${user.getRoles()}">
+            <span th:text="${role.getName()}"></span>
+        </span>
+        </td>
+        <td><a th:href="@{admin/user-update/{id}(id=${user.id})}">
+            <input type="submit" value="Update"/></a>
+        </td>
+        <td>
+            <form th:method="DELETE" th:action="@{admin/user-delete/{id}(id=${user.getId()})}">
+                <input type="submit" value="Delete"/>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+
+</table>
+</div>
+<a th:href="@{admin/user-save}">
+    <input type="submit" value="Create user"/>
+</a>
+<br>
+<br>
+<a th:href="@{/login}">
+    <input type="submit" value="Exit"/>
+</a>
+</div>
+</body>
+</html>
